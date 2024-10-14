@@ -1,3 +1,3 @@
-H:/by-domain/work_and_learning/PhD/research/2024_GNN_FOR_TSP/sourcecodes/regret_prediction_postprocessing/cmake-build-debug/CMakeFiles/regret_prediction_postprocessing.dir
-H:/by-domain/work_and_learning/PhD/research/2024_GNN_FOR_TSP/sourcecodes/regret_prediction_postprocessing/cmake-build-debug/CMakeFiles/edit_cache.dir
-H:/by-domain/work_and_learning/PhD/research/2024_GNN_FOR_TSP/sourcecodes/regret_prediction_postprocessing/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+D:/Git/GitHub/SourceCodes/regret-based-heuristics/cmake-build-debug/CMakeFiles/regret_prediction_postprocessing.dir
+D:/Git/GitHub/SourceCodes/regret-based-heuristics/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/Git/GitHub/SourceCodes/regret-based-heuristics/cmake-build-debug/CMakeFiles/rebuild_cache.dir

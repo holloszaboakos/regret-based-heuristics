@@ -1,0 +1,99 @@
+fun threeOptCycle(
+    permutation: Permutation,
+    regretRecord: RegretData,
+    regretMatrixWithNoise: DoubleMatrix,
+    cost: Double
+): Double {
+    var bestCost = cost
+    val edges =
+        (1 until permutation.size)
+            .map { index ->
+                GraphEdge(
+                    sourceNodeIndex = permutation[index - 1],
+                    targetNodeIndex = permutation[index],
+                    value = regretMatrixWithNoise[permutation[index - 1], permutation[index]]
+                )
+            } +
+                GraphEdge(
+                    sourceNodeIndex = permutation.last(),
+                    targetNodeIndex = permutation.size,
+                    value = regretMatrixWithNoise[permutation.last(), permutation.size]
+                ) +
+                GraphEdge(
+                    sourceNodeIndex = permutation.size,
+                    targetNodeIndex = permutation[0],
+                    value = regretMatrixWithNoise[permutation.size, permutation[0]]
+                )
+
+
+    val edgesOrderedWithIndex = edges.withIndex().sortedByDescending { it.value.value }.withIndex().toList()
+    val threeOptOperator = ThreeOptOperator()
+
+    for (i in edgesOrderedWithIndex.slice(0 until edgesOrderedWithIndex.size - 2)) {
+        for (j in edgesOrderedWithIndex.slice(i.index + 1 until edgesOrderedWithIndex.size - 1)) {
+            for (k in edgesOrderedWithIndex.slice(j.index + 1 until edgesOrderedWithIndex.size)) {
+                val positions = intArrayOf(i.value.index, j.value.index, k.value.index).sorted().toIntArray().asImmutable()
+                threeOptOperator.apply(permutation, positions)
+                val newCost = calcCostOfTspSolution(permutation, regretRecord.distanceMatrix)
+                if (newCost <= bestCost) {
+                    bestCost = newCost
+                } else {
+                    //TODO: NOT EFFICIENT!
+                    threeOptOperator.revert(permutation, positions)
+                }
+            }
+        }
+    }
+
+    return bestCost
+}
+
+fun calcCostOfTspSolution(permutation: Permutation, distanceMatrix: DoubleMatrix): Double =
+    (1 until permutation.size)
+        .sumOf { index ->
+            distanceMatrix[permutation[index - 1], permutation[index]]
+        } +
+            distanceMatrix[permutation.last(), permutation.size] +
+            distanceMatrix[permutation.size, permutation[0]]
+
+class ThreeOptOperator {
+    fun apply(
+        permutation: Permutation,
+        positions: ImmutableIntArray,
+    ) {
+        require(positions.size == 3) { "Three positions are expected!" }
+        require(positions[0] < positions[1] && positions[1] < positions[2]) {
+            "Three positions should be ordered!"
+        }
+
+        val firstSection = permutation.slice(0 until positions[0])
+        val secondSection = permutation.slice(positions[0] until positions[1])
+        val thirdSection = permutation.slice(positions[1] until positions[2])
+        val lastSection = permutation.slice(positions[2] until permutation.size)
+
+        val newOrder = firstSection + thirdSection + secondSection + lastSection
+
+        permutation.clear()
+        newOrder.forEachIndexed { index, value -> permutation[index] = value }
+    }
+
+    fun revert(
+        permutation: Permutation,
+        positions: ImmutableIntArray,
+    ) {
+        require(positions.size == 3) { "Three positions are expected!" }
+        require(positions[0] < positions[1] && positions[1] < positions[2]) { "Three positions should be ordered!" }
+
+        val middlePosition = positions[0] + positions[2] - positions[1]
+
+        val firstSection = permutation.slice(0 until positions[0])
+        val secondSection = permutation.slice(positions[0] until middlePosition)
+        val thirdSection = permutation.slice(middlePosition until positions[2])
+        val lastSection = permutation.slice(positions[2] until permutation.size)
+
+        val newOrder = firstSection + thirdSection + secondSection + lastSection
+
+        permutation.clear()
+        newOrder.forEachIndexed { index, value -> permutation[index] = value }
+    }
+}

@@ -283,10 +283,12 @@ inline std::optional<edge_builder_node *> findNewNode(
                     return parent->getRegretEdge().getTargetNodeIndex() != regret_edge.second.getSourceNodeIndex() ||
                            parent->getRegretEdge().getSourceNodeIndex() != regret_edge.second.getTargetNodeIndex();
                 })
-        // sequencesFromSource[edge.targetNodeIndex] != edge.sourceNodeIndex || sequencesToTarget[edge.sourceNodeIndex] != edge.targetNodeIndex
+                // sequencesFromSource[edge.targetNodeIndex] != edge.sourceNodeIndex || sequencesToTarget[edge.sourceNodeIndex] != edge.targetNodeIndex
                 | views::filter([parent](const std::pair<int, graph_edge<double> > &regret_edge) {
-                    return parent->getSequenceFromSource()[regret_edge.second.getTargetNodeIndex()] != regret_edge.second.getSourceNodeIndex() ||
-                           parent->getSequenceToTarget()[regret_edge.second.getSourceNodeIndex()] != regret_edge.second.getTargetNodeIndex();
+                    return parent->getSequenceFromSource()[regret_edge.second.getTargetNodeIndex()] != regret_edge.
+                           second.getSourceNodeIndex() ||
+                           parent->getSequenceToTarget()[regret_edge.second.getSourceNodeIndex()] != regret_edge.second.
+                           getTargetNodeIndex();
                 })
                 | views::transform([parent](const std::pair<int, graph_edge<double> > &it) {
                     auto [regretEdgeIndex, regretEdge] = it;
@@ -397,8 +399,8 @@ inline pair<permutation, double> edge_based_branch_and_bounds(
                        | ranges::to<vector<graph_edge<double> > >();
             })
             | std::views::transform([](vector<graph_edge<double> > column) {
-                std::ranges::sort(column, [](const graph_edge<double> &a, const graph_edge<double> &b) {
-                    return a.getValue() < b.getValue();
+                ranges::sort(column, [](graph_edge<double> a, graph_edge<double> b) {
+                    return a.getValue() > b.getValue();
                 });
                 return column;
             })
@@ -409,10 +411,9 @@ inline pair<permutation, double> edge_based_branch_and_bounds(
             | ranges::to<vector<graph_edge<double> > >();
 
     std::ranges::sort(
-        flattened_edges.begin(),
-        flattened_edges.end(),
-        [](const graph_edge<double> &a, const graph_edge<double> &b) {
-            return a.getValue() < b.getValue();
+        flattened_edges,
+        [](graph_edge<double> a, graph_edge<double> b) {
+            return a.getValue() > b.getValue();
         }
     );
 
@@ -484,7 +485,6 @@ inline pair<permutation, double> edge_based_branch_and_bounds(
         auto currentNode = std::optional{&routeNode};
 
         while (true) {
-
             //LEAF
             if (currentNode.value()->getParents().size() == graph.size() - 2) {
                 const vector<pair<int, int> > sequences =
@@ -508,7 +508,8 @@ inline pair<permutation, double> edge_based_branch_and_bounds(
                 }
 
                 if (stopOnFirstResult) {
-                    cout << "DONE-" << duration_cast<chrono::seconds>(std::chrono::high_resolution_clock::now() - start).count() << endl;
+                    cout << "DONE-" << duration_cast<chrono::seconds>(std::chrono::high_resolution_clock::now() - start)
+                            .count() << endl;
                     return pair(toPermutation(bestSequentialRepresentation), bestCost);
                 }
             }

@@ -1,0 +1,11 @@
+{
+"rules": [
+{
+"primary-output": "CMakeFiles\\regret_prediction_postprocessing.dir\\src\\regret_based_local_search_model_evaluation.cpp.obj",
+"requires": [
+]
+}
+],
+"version": 0,
+"revision": 0
+}

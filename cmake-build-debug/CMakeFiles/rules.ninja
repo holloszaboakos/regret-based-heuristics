@@ -72,7 +72,7 @@ rule CUSTOM_COMMAND
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = C:\Users\LENOVO\AppData\Local\Programs\CLion\bin\cmake\win\x64\bin\cmake.exe --regenerate-during-build -SH:\by-domain\work_and_learning\PhD\research\2024_GNN_FOR_TSP\sourcecodes\regret_prediction_postprocessing -BH:\by-domain\work_and_learning\PhD\research\2024_GNN_FOR_TSP\sourcecodes\regret_prediction_postprocessing\cmake-build-debug
+  command = C:\Users\LENOVO\AppData\Local\Programs\CLion\bin\cmake\win\x64\bin\cmake.exe --regenerate-during-build -SD:\Git\GitHub\SourceCodes\regret-based-heuristics -BD:\Git\GitHub\SourceCodes\regret-based-heuristics\cmake-build-debug
   description = Re-running CMake...
   generator = 1
 

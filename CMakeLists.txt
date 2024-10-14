@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(regret_prediction_postprocessing
-        src/main.cpp
+        src/regret_based_local_search_model_evaluation.cpp
         src/permutation.h
         src/graph_edge.h
         src/regret_data.h
@@ -17,4 +17,8 @@ add_executable(regret_prediction_postprocessing
         src/utility/first_or_null.h
         src/utility/group_by.h
         src/utility/sort_by.h
+        src/calc_cost_of_tsp.h
+        src/three_opt_cycle.h
+        src/three_opt_operator.h
+        src/cost_record.h
 )

@@ -5,14 +5,14 @@
 	"compiler-simulate-id" : "",
 	"config" : "Debug",
 	"cxx-modules" : {},
-	"dir-cur-bld" : "H:/by-domain/work_and_learning/PhD/research/2024_GNN_FOR_TSP/sourcecodes/regret_prediction_postprocessing/cmake-build-debug",
-	"dir-cur-src" : "H:/by-domain/work_and_learning/PhD/research/2024_GNN_FOR_TSP/sourcecodes/regret_prediction_postprocessing",
-	"dir-top-bld" : "H:/by-domain/work_and_learning/PhD/research/2024_GNN_FOR_TSP/sourcecodes/regret_prediction_postprocessing/cmake-build-debug",
-	"dir-top-src" : "H:/by-domain/work_and_learning/PhD/research/2024_GNN_FOR_TSP/sourcecodes/regret_prediction_postprocessing",
+	"dir-cur-bld" : "D:/Git/GitHub/SourceCodes/regret-based-heuristics/cmake-build-debug",
+	"dir-cur-src" : "D:/Git/GitHub/SourceCodes/regret-based-heuristics",
+	"dir-top-bld" : "D:/Git/GitHub/SourceCodes/regret-based-heuristics/cmake-build-debug",
+	"dir-top-src" : "D:/Git/GitHub/SourceCodes/regret-based-heuristics",
 	"exports" : [],
 	"forward-modules-from-target-dirs" : [],
 	"include-dirs" : [],
 	"language" : "CXX",
 	"linked-target-dirs" : [],
-	"module-dir" : "H:/by-domain/work_and_learning/PhD/research/2024_GNN_FOR_TSP/sourcecodes/regret_prediction_postprocessing/cmake-build-debug/CMakeFiles/regret_prediction_postprocessing.dir"
+	"module-dir" : "D:/Git/GitHub/SourceCodes/regret-based-heuristics/cmake-build-debug/CMakeFiles/regret_prediction_postprocessing.dir"
 }
