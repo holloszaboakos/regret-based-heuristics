@@ -15,9 +15,13 @@ struct graph_edge {
     ): sourceNodeIndex(sourceNodeIndex), targetNodeIndex(targetNodeIndex), value(value) {
     }
 
-    graph_edge(const graph_edge<T> & other) = default;
+    graph_edge(const graph_edge<T> &other) = default;
 
-    graph_edge(graph_edge<T> && other) = default;
+    graph_edge(graph_edge<T> &&other) = default;
+
+    ~graph_edge() = default;
+
+    graph_edge<T>& operator=(const graph_edge<T>&) = default;
 
     [[nodiscard]] int getSourceNodeIndex() const { return sourceNodeIndex; }
     [[nodiscard]] int getTargetNodeIndex() const { return targetNodeIndex; }

@@ -14,9 +14,9 @@ int main() {
         );
 
         vector<cost_record> results =
-                views::zip(views::iota(0, static_cast<int>(regretData.size())), regretData)
-                | views::take(100)
-                | views::transform([](std::pair<int, regret_data> item) {
+                std::views::zip(std::views::iota(0, static_cast<int>(regretData.size())), regretData)
+                | std::views::take(100)
+                | std::views::transform([](std::pair<int, regret_data> item) {
                     auto [regretRecordIndex, regretRecord] = item;
                     cout << "Regret record! " << regretRecordIndex << endl;
                     auto [_,initial_cost] = edge_based_branch_and_bounds(

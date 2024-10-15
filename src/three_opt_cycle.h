@@ -4,14 +4,12 @@
 
 #ifndef THREE_OPT_CYCLE_H
 #define THREE_OPT_CYCLE_H
-#include <valarray>
 
 #include "calc_cost_of_tsp.h"
 #include "graph_edge.h"
 #include "permutation.h"
 #include "regret_data.h"
 #include "three_opt_operator.h"
-#include "utility/sort_by.h"
 
 double three_opt_cycle(
     permutation &solution,
@@ -20,7 +18,7 @@ double three_opt_cycle(
     const double &cost
 ) {
     double best_cost = cost;
-    auto edges = std::vector<graph_edge<double> >(solution.getSize() + 1);
+    auto edges = std::vector<graph_edge<double> >(solution.getSize() + 1, graph_edge<double>(-1,-1,-1.0));
     for (int i = 1; i < solution.getSize(); ++i) {
         edges.emplace_back(
             solution.get(i - 1),
@@ -41,11 +39,12 @@ double three_opt_cycle(
 
 
     vector<pair<int, graph_edge<double> > > edges_sorted_with_index =
-            views::zip(views::iota(0, static_cast<int>(edges.size())), edges)
+            std::views::zip(std::views::iota(0, static_cast<int>(edges.size())), edges)
             | ranges::to<vector<pair<int, graph_edge<double> > > >();
 
-    std::ranges::sort(
-        edges_sorted_with_index,
+    std::sort(
+        edges_sorted_with_index.begin(),
+        edges_sorted_with_index.end(),
         [](pair<int, graph_edge<double> > a, pair<int, graph_edge<double> > b) {
             return a.second.getValue() < b.second.getValue();
         }

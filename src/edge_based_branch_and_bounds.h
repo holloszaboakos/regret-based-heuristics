@@ -4,9 +4,8 @@
 
 #ifndef EDGE_BASED_BRANCH_AND_BOUNDS_H
 #define EDGE_BASED_BRANCH_AND_BOUNDS_H
-#include <map>
-#include <utility>
-#include <vector>
+#include <algorithm>
+#include <ranges>
 
 #include "graph_edge.h"
 #include "permutation.h"
@@ -17,12 +16,14 @@
 //#include "windows.h"
 // #include "psapi.h"
 
+using namespace std::ranges;
+
 struct edge_builder_node {
     edge_builder_node(
         const int regretEdgeIndex,
         const graph_edge<double> regretEdge,
         const int level,
-        const std::vector<edge_builder_node *> parents,
+        const std::vector<edge_builder_node *>& parents,
         const int lastVisitedChildrenIndex,
         std::vector<int> sequentialRepresentation,
         std::vector<int> sequencesFromSource,
@@ -105,11 +106,11 @@ private:
 long nearestNeighbourUnderEstimateCost(
     int regret_edge_index,
     graph_edge<double> regret_edge,
-    const vector<vector<double> > &graph,
-    const vector<edge_builder_node *> &parents,
-    const vector<int> &sequence_from_source,
-    const vector<int> &sequence_to_target,
-    const vector<int> &sequential_representation,
+    const std::vector<std::vector<double> > &graph,
+    const std::vector<edge_builder_node *> &parents,
+    const std::vector<int> &sequence_from_source,
+    const std::vector<int> &sequence_to_target,
+    const std::vector<int> &sequential_representation,
     const std::vector<std::vector<std::pair<int, graph_edge<double> > > > &regretEdgesSortedByDistanceGroupedBySource
 ) {
     int count = std::ranges::count_if(
@@ -120,18 +121,18 @@ long nearestNeighbourUnderEstimateCost(
 
     int first_not_null_target =
             sequence_to_target
-            | std::views::filter([](int it) { return it >= 0; })
+            | ranges::views::filter([](int it) { return it >= 0; })
             | first;
     int first_not_null_source =
             sequence_from_source
-            | views::filter([](int it) { return it >= 0; })
+            | ranges::views::filter([](int it) { return it >= 0; })
             | first;
 
     if (count == 1) {
         return floor(graph[first_not_null_target][first_not_null_source]);
     }
 
-    vector<long> values = std::views::iota(0, static_cast<int>(sequential_representation.size()))
+    std::vector<long> values = std::views::iota(0, static_cast<int>(sequential_representation.size()))
                           | std::views::transform([sequential_representation](int index) {
                               return pair(index, sequential_representation[index]);
                           })
@@ -158,17 +159,17 @@ long nearestNeighbourUnderEstimateCost(
                                           }
                                           return true;
                                       })
-                                      | views::filter([regret_edge](const std::pair<int, graph_edge<double> > &it) {
+                                      | ranges::views::filter([regret_edge](const std::pair<int, graph_edge<double> > &it) {
                                           return regret_edge.getSourceNodeIndex() != it.second.getSourceNodeIndex();
                                       })
-                                      | views::filter([regret_edge](const std::pair<int, graph_edge<double> > &it) {
+                                      | ranges::views::filter([regret_edge](const std::pair<int, graph_edge<double> > &it) {
                                           return regret_edge.getTargetNodeIndex() != it.second.getTargetNodeIndex();
                                       })
-                                      | views::filter([regret_edge](const std::pair<int, graph_edge<double> > &it) {
+                                      | ranges::views::filter([regret_edge](const std::pair<int, graph_edge<double> > &it) {
                                           return regret_edge.getTargetNodeIndex() != it.second.getSourceNodeIndex() ||
                                                  regret_edge.getSourceNodeIndex() != it.second.getTargetNodeIndex();
                                       })
-                                      | views::filter(
+                                      | ranges::views::filter(
                                           [sequence_from_source,sequence_to_target ](
                                       const std::pair<int, graph_edge<double> > &it) {
                                               return sequence_from_source[it.second.getTargetNodeIndex()] != it.second.
@@ -192,12 +193,12 @@ long nearestNeighbourUnderEstimateCost(
                                   graph[selected.second.getSourceNodeIndex()][selected.second.getTargetNodeIndex()]));
                           })
                           | std::views::filter([](const long it) { return it > 0; })
-                          | ranges::to<vector<long> >();
+                          | ranges::to<std::vector<long> >();
 
     const auto missing_count = (
         sequential_representation
-        | views::filter([](long it) { return it < 0; })
-        | ranges::to<vector<long> >()
+        | ranges::views::filter([](long it) { return it < 0; })
+        | ranges::to<std::vector<long> >()
     ).size();
 
     if (missing_count != values.size()) {
@@ -261,8 +262,8 @@ inline std::optional<edge_builder_node *> findNewNode(
 
         auto selectedPartialNode =
                 regret_edges
-                | views::drop(parent->getLastVisitedChildrenIndex() + 1)
-                | views::filter([parent](const std::pair<int, graph_edge<double> > &regret_edge) {
+                | ranges::views::drop(parent->getLastVisitedChildrenIndex() + 1)
+                | ranges::views::filter([parent](const std::pair<int, graph_edge<double> > &regret_edge) {
                     for (const auto &it: parent->getParents()) {
                         if (it->getRegretEdge().getSourceNodeIndex() == regret_edge.second.getSourceNodeIndex() ||
                             it->getRegretEdge().getTargetNodeIndex() == regret_edge.second.getTargetNodeIndex() ||
@@ -273,24 +274,24 @@ inline std::optional<edge_builder_node *> findNewNode(
                     }
                     return true;
                 })
-                | views::filter([parent](const std::pair<int, graph_edge<double> > &regret_edge) {
+                | ranges::views::filter([parent](const std::pair<int, graph_edge<double> > &regret_edge) {
                     return parent->getRegretEdge().getSourceNodeIndex() != regret_edge.second.getSourceNodeIndex();
                 })
-                | views::filter([parent](const std::pair<int, graph_edge<double> > &regret_edge) {
+                | ranges::views::filter([parent](const std::pair<int, graph_edge<double> > &regret_edge) {
                     return parent->getRegretEdge().getTargetNodeIndex() != regret_edge.second.getTargetNodeIndex();
                 })
-                | views::filter([parent](const std::pair<int, graph_edge<double> > &regret_edge) {
+                | ranges::views::filter([parent](const std::pair<int, graph_edge<double> > &regret_edge) {
                     return parent->getRegretEdge().getTargetNodeIndex() != regret_edge.second.getSourceNodeIndex() ||
                            parent->getRegretEdge().getSourceNodeIndex() != regret_edge.second.getTargetNodeIndex();
                 })
                 // sequencesFromSource[edge.targetNodeIndex] != edge.sourceNodeIndex || sequencesToTarget[edge.sourceNodeIndex] != edge.targetNodeIndex
-                | views::filter([parent](const std::pair<int, graph_edge<double> > &regret_edge) {
+                | ranges::views::filter([parent](const std::pair<int, graph_edge<double> > &regret_edge) {
                     return parent->getSequenceFromSource()[regret_edge.second.getTargetNodeIndex()] != regret_edge.
                            second.getSourceNodeIndex() ||
                            parent->getSequenceToTarget()[regret_edge.second.getSourceNodeIndex()] != regret_edge.second.
                            getTargetNodeIndex();
                 })
-                | views::transform([parent](const std::pair<int, graph_edge<double> > &it) {
+                | ranges::views::transform([parent](const std::pair<int, graph_edge<double> > &it) {
                     auto [regretEdgeIndex, regretEdge] = it;
                     auto matchingOnSource = parent->getSequenceToTarget()[regretEdge.getSourceNodeIndex()];
                     auto matchingOnTarget = parent->getSequenceFromSource()[regretEdge.getTargetNodeIndex()];
@@ -328,7 +329,7 @@ inline std::optional<edge_builder_node *> findNewNode(
                         sequencesToTarget
                     );
                 })
-                | views::filter(
+                | ranges::views::filter(
                     [parent,graph,regretEdgesSortedByDistanceGroupedBySource,best_cost
                     ](const partial_edge_builder_node &node) {
                         const auto parent_path = parent->getPathCost();
@@ -396,10 +397,10 @@ inline pair<permutation, double> edge_based_branch_and_bounds(
                                regret[columnIndex][rowIndex]
                            );
                        })
-                       | ranges::to<vector<graph_edge<double> > >();
+                       | ranges::to<std::vector<graph_edge<double> > >();
             })
-            | std::views::transform([](vector<graph_edge<double> > column) {
-                ranges::sort(column, [](graph_edge<double> a, graph_edge<double> b) {
+            | std::views::transform([](std::vector<graph_edge<double> > column) {
+                std::sort(column.begin(),column.end(), [](const graph_edge<double> & a, const graph_edge<double> & b) {
                     return a.getValue() > b.getValue();
                 });
                 return column;
@@ -408,50 +409,51 @@ inline pair<permutation, double> edge_based_branch_and_bounds(
             | std::views::filter([](const graph_edge<double> &value) {
                 return value.getSourceNodeIndex() != value.getTargetNodeIndex();
             })
-            | ranges::to<vector<graph_edge<double> > >();
+            | ranges::to<std::vector<graph_edge<double> > >();
 
-    std::ranges::sort(
-        flattened_edges,
-        [](graph_edge<double> a, graph_edge<double> b) {
+    std::sort(
+        flattened_edges.begin(),
+        flattened_edges.end(),
+        [](graph_edge<double> const& a, graph_edge<double> const& b) {
             return a.getValue() > b.getValue();
         }
     );
 
-    vector<pair<int, graph_edge<double> > > regret_edges =
-            views::zip(views::iota(0, static_cast<int>(flattened_edges.size())), flattened_edges)
-            | ranges::to<vector<pair<int, graph_edge<double> > > >();
+    std::vector<pair<int, graph_edge<double> > > regret_edges =
+            ranges::views::zip(ranges::views::iota(0, static_cast<int>(flattened_edges.size())), flattened_edges)
+            | ranges::to<std::vector<pair<int, graph_edge<double> > > >();
 
-    vector<vector<pair<int, graph_edge<double> > > > regretEdgesSortedByDistanceGroupedBySource =
-            vector<vector<pair<int, graph_edge<double> > > >(graph.size());
+    std::vector<std::vector<pair<int, graph_edge<double> > > > regretEdgesSortedByDistanceGroupedBySource =
+            std::vector<std::vector<pair<int, graph_edge<double> > > >(graph.size());
     //goup by
     //array<T> -> map<K,array<T>>
-    vector<pair<int, pair<int, graph_edge<double> > > > tmp =
+    std::vector<pair<int, pair<int, graph_edge<double> > > > tmp =
             regret_edges
-            | views::transform([](pair<int, graph_edge<double> > item) {
+            | ranges::views::transform([](pair<int, graph_edge<double> > item) {
                 return pair(item.second.getSourceNodeIndex(), item);
             })
-            | std::ranges::to<vector<pair<int, pair<int, graph_edge<double> > > > >();
+            | std::ranges::to<std::vector<pair<int, pair<int, graph_edge<double> > > > >();
 
     for (auto [key, value]: tmp) {
         if (regretEdgesSortedByDistanceGroupedBySource[key].size() != 0) {
             regretEdgesSortedByDistanceGroupedBySource[key].push_back(value);
         } else {
-            regretEdgesSortedByDistanceGroupedBySource[key] = vector(1, value);
+            regretEdgesSortedByDistanceGroupedBySource[key] = std::vector(1, value);
         }
     }
 
-    tmp = vector<pair<int, pair<int, graph_edge<double> > > >();
+    tmp = std::vector<pair<int, pair<int, graph_edge<double> > > >();
 
-    vector<edge_builder_node> routeNodes =
+    std::vector<edge_builder_node> routeNodes =
             regret_edges
-            | views::transform([graph](pair<int, graph_edge<double> > item) {
+            | ranges::views::transform([graph](pair<int, graph_edge<double> > item) {
                 auto [regretEdgeIndex, regretEdge] = item;
 
-                auto sequentialRepresentation = vector(graph.size(), -1);
+                auto sequentialRepresentation = std::vector(graph.size(), -1);
                 sequentialRepresentation[regretEdge.getSourceNodeIndex()] = regretEdge.getTargetNodeIndex();
-                auto sequencesFromSource = vector(graph.size(), -1);
+                auto sequencesFromSource = std::vector(graph.size(), -1);
                 sequencesFromSource[regretEdge.getSourceNodeIndex()] = regretEdge.getTargetNodeIndex();
-                auto sequencesToTarget = vector(graph.size(), -1);
+                auto sequencesToTarget = std::vector(graph.size(), -1);
                 sequencesToTarget[regretEdge.getTargetNodeIndex()] = regretEdge.getSourceNodeIndex();
 
                 return edge_builder_node(
@@ -466,7 +468,7 @@ inline pair<permutation, double> edge_based_branch_and_bounds(
                     graph[regretEdge.getSourceNodeIndex()][regretEdge.getTargetNodeIndex()]
                 );
             })
-            | std::ranges::to<vector<edge_builder_node> >();
+            | std::ranges::to<std::vector<edge_builder_node> >();
 
     for (auto routeNode: routeNodes) {
         auto potentialCost = graph[routeNode.getRegretEdge().getSourceNodeIndex()][routeNode.getRegretEdge().
@@ -485,17 +487,19 @@ inline pair<permutation, double> edge_based_branch_and_bounds(
         auto currentNode = std::optional{&routeNode};
 
         while (true) {
+            //TODO: should stop after 5s, but be fast enough to produce a result!
+
             //LEAF
             if (currentNode.value()->getParents().size() == graph.size() - 2) {
-                const vector<pair<int, int> > sequences =
-                        views::zip(
+                const std::vector<pair<int, int> > sequences =
+                        ranges::views::zip(
                             std::views::iota(0, static_cast<int>(currentNode.value()->getSequenceFromSource().size())),
                             currentNode.value()->getSequenceFromSource()
                         )
                         | std::views::filter([](const pair<int, int> &indexedValue) {
                             return indexedValue.second >= 0;
                         })
-                        | ranges::to<vector<pair<int, int> > >();
+                        | ranges::to<std::vector<pair<int, int> > >();
 
                 if (sequences.size() != 1) {
                     cout << "Hamiltonian path should be built!" << endl;
@@ -514,8 +518,6 @@ inline pair<permutation, double> edge_based_branch_and_bounds(
                 }
             }
 
-            //TODO: extremely sus
-            //TODO: this takes too much time!!!
             currentNode = findNewNode(
                 currentNode.value(),
                 regret_edges,
